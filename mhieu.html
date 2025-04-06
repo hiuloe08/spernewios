@@ -215,57 +215,11 @@
             to { width: 100%; }
         }
 
-        /* Background particle animation */
-        @keyframes particles {
-            0% {
-                transform: translateY(0) rotate(0deg);
-            }
-            100% {
-                transform: translateY(-100%) rotate(360deg);
-            }
-        }
-
-        .particle {
-            position: absolute;
-            background-color: rgba(0, 255, 0, 0.8);
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            animation: particles 5s linear infinite;
-        }
-
-        /* Create multiple particles */
-        .particle:nth-child(1) {
-            top: 10%;
-            left: 10%;
-            animation-duration: 6s;
-        }
-        .particle:nth-child(2) {
-            top: 50%;
-            left: 20%;
-            animation-duration: 8s;
-        }
-        .particle:nth-child(3) {
-            top: 20%;
-            left: 30%;
-            animation-duration: 7s;
-        }
-        .particle:nth-child(4) {
-            top: 70%;
-            left: 50%;
-            animation-duration: 9s;
-        }
     </style>
 </head>
 <body>
 
     <div class="background"></div>
-
-    <!-- Particle effects -->
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
 
     <div class="container">
         <h1>Tool Dự Đoán Tài Xỉu MD5 💻</h1>
@@ -309,7 +263,7 @@
     <script>
         // Kiểm tra tính hợp lệ của MD5
         function isValidMD5(md5) {
-            return /^[a-f0-9]{32}$/.test(md5);
+            return /^[a-f0-9]{32}$/.test(md5);  // Kiểm tra xem MD5 có đúng định dạng 32 ký tự hay không
         }
 
         // Phân tích MD5 và hiển thị kết quả
@@ -321,16 +275,19 @@
             }
             document.getElementById('md5-error').style.display = 'none';
 
-            // Lấy số cuối MD5
-            const lastDigit = parseInt(md5[md5.length - 1], 16); // Lấy số cuối của MD5
+            // Lấy nhiều ký tự của MD5 để phân tích
+            const md5Digits = md5.split('').map(char => parseInt(char, 16)); // Chuyển MD5 thành các số thập phân
 
-            // Tính toán xác suất
-            const tai = lastDigit >= 8 ? 70 : 30;
-            const xiu = 100 - tai;
+            // Tính toán một giá trị tổng hợp từ các ký tự MD5
+            const sum = md5Digits.reduce((acc, val) => acc + val, 0); // Tính tổng các giá trị số trong MD5
+
+            // Dùng tổng giá trị này để xác định xác suất cho Tài và Xỉu
+            const tai = (sum % 100);  // Tính tỷ lệ Tài dựa vào tổng giá trị % 100
+            const xiu = 100 - tai;  // Tính tỷ lệ Xỉu là phần còn lại
 
             // Hiển thị kết quả
             document.getElementById('result-md5').innerText = md5;
-            document.getElementById('result-last-digit').innerText = lastDigit;
+            document.getElementById('result-last-digit').innerText = md5[md5.length - 1];
             document.getElementById('result-tai').innerText = tai.toFixed(2);
             document.getElementById('result-xiu').innerText = xiu.toFixed(2);
 
@@ -359,5 +316,6 @@
             document.getElementById('contact-section').style.display = 'none';
         }
     </script>
+
 </body>
 </html>
