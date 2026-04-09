@@ -3,532 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF Email Capture Tool - ProxyPin</title>
+    <title>FF Email Capture - ProxyPin</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: monospace;
+            background: #1a1a2e;
             padding: 20px;
+            color: #eee;
         }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* Header */
+        .container { max-width: 1200px; margin: 0 auto; }
         .header {
-            background: white;
-            border-radius: 15px;
+            background: #16213e;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        h1 {
-            color: #667eea;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .status-bar {
-            display: flex;
-            gap: 15px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        .status-card {
-            background: #f0f0f0;
-            padding: 10px 20px;
             border-radius: 10px;
-            flex: 1;
-            min-width: 150px;
+            margin-bottom: 20px;
         }
-
-        .status-card .label {
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
             font-size: 12px;
-            color: #666;
+            margin-top: 10px;
         }
-
-        .status-card .value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .status-card.online {
-            background: #d4edda;
-            border-left: 4px solid #28a745;
-        }
-
-        .status-card.offline {
-            background: #f8d7da;
-            border-left: 4px solid #dc3545;
-        }
-
-        /* Controls */
-        .controls {
-            background: white;
-            border-radius: 15px;
+        .online { background: #0f3460; color: #00ff00; }
+        .offline { background: #0f3460; color: #ff0000; }
+        .panel {
+            background: #16213e;
+            border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .filter-group {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .filter-group input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            flex: 1;
-            min-width: 200px;
-        }
-
-        /* Main content */
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Request panel */
-        .panel {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .panel-header {
-            background: #f8f9fa;
-            padding: 15px 20px;
-            border-bottom: 2px solid #667eea;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .panel-body {
-            padding: 15px;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        /* Request item */
-        .request-item {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-left: 3px solid #667eea;
-        }
-
-        .request-item:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-        }
-
-        .request-method {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .method-GET { background: #28a745; color: white; }
-        .method-POST { background: #007bff; color: white; }
-        .method-PUT { background: #ffc107; color: black; }
-        .method-DELETE { background: #dc3545; color: white; }
-
-        .request-url {
-            font-size: 13px;
-            color: #333;
-            word-break: break-all;
-        }
-
-        .request-time {
-            font-size: 10px;
-            color: #999;
-            margin-top: 5px;
-        }
-
-        /* Email item */
         .email-item {
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-            border: 1px solid #667eea30;
-            transition: all 0.2s;
+            background: #0f3460;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 3px solid #00ff00;
         }
-
-        .email-item:hover {
-            transform: translateX(-5px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .email-address {
-            font-size: 16px;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-
-        .email-source {
-            font-size: 11px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .copy-btn {
-            float: right;
-            background: #667eea;
+        .email { font-size: 18px; font-weight: bold; color: #00ff00; }
+        .time { font-size: 11px; color: #888; margin-top: 5px; }
+        button {
+            background: #e94560;
             color: white;
             border: none;
-            padding: 4px 12px;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 11px;
+            margin: 5px;
         }
-
-        .copy-btn:hover {
-            background: #5a67d8;
-        }
-
-        /* Toast message */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #28a745;
+        button:hover { background: #ff6b6b; }
+        input {
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            background: #0f3460;
+            border: 1px solid #e94560;
             color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            display: none;
-            animation: slideIn 0.3s ease;
-            z-index: 1000;
+            border-radius: 5px;
         }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        .request-item {
+            background: #0f3460;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-size: 12px;
+            overflow: hidden;
         }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #999;
+        .method {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #e94560;
+            border-radius: 3px;
+            margin-right: 10px;
+            font-size: 10px;
         }
+        .url { word-break: break-all; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <h1>🎮 FF Email Capture Tool</h1>
-            <p>Tích hợp với ProxyPin - Tự động bắt email xác thực Free Fire</p>
-            
-            <div class="status-bar">
-                <div class="status-card" id="proxyStatus">
-                    <div class="label">ProxyPin Status</div>
-                    <div class="value">🔌 Đang kiểm tra...</div>
-                </div>
-                <div class="status-card">
-                    <div class="label">Total Requests</div>
-                    <div class="value" id="totalRequests">0</div>
-                </div>
-                <div class="status-card">
-                    <div class="label">Emails Found</div>
-                    <div class="value" id="totalEmails">0</div>
-                </div>
-            </div>
+            <p>Kết nối với ProxyPin → Tự động lấy email xác thực</p>
+            <div id="status" class="status offline">● Đang kết nối...</div>
         </div>
 
-        <!-- Controls -->
-        <div class="controls">
-            <button class="btn btn-primary" onclick="startCapture()">▶ Bắt đầu capture</button>
-            <button class="btn btn-danger" onclick="clearData()">🗑 Xóa dữ liệu</button>
-            <button class="btn btn-success" onclick="exportData()">💾 Export JSON</button>
-            
-            <div class="filter-group">
-                <input type="text" id="filterInput" placeholder="🔍 Lọc email hoặc URL..." onkeyup="filterData()">
-                <label>
-                    <input type="checkbox" id="autoRefresh" checked> Tự động refresh
-                </label>
-                <span id="autoRefreshStatus" style="font-size: 12px; color: #28a745;">● Đang chạy</span>
-            </div>
+        <div class="panel">
+            <h3>📡 Cấu hình ProxyPin</h3>
+            <code style="background:#0f3460; padding:10px; display:block; border-radius:5px;">
+                Webhook URL: http://[IP_MÁY_TÍNH]:5000/api/capture<br>
+                Method: POST<br>
+                Content-Type: application/json
+            </code>
         </div>
 
-        <!-- Main content -->
-        <div class="main-content">
-            <!-- Requests panel -->
-            <div class="panel">
-                <div class="panel-header">
-                    📡 Requests từ ProxyPin
-                    <span id="requestCount" style="font-size: 12px;">0</span>
-                </div>
-                <div class="panel-body" id="requestsList">
-                    <div class="loading">Đang chờ dữ liệu từ ProxyPin...</div>
-                </div>
-            </div>
+        <div class="panel">
+            <h3>📧 Email đã capture (<span id="emailCount">0</span>)</h3>
+            <button onclick="clearData()">🗑 Xóa hết</button>
+            <button onclick="exportData()">💾 Export JSON</button>
+            <input type="text" id="filter" placeholder="🔍 Lọc email..." onkeyup="filterEmails()">
+            <div id="emailsList"></div>
+        </div>
 
-            <!-- Emails panel -->
-            <div class="panel">
-                <div class="panel-header">
-                    📧 Email đã phát hiện
-                    <span id="emailCount" style="font-size: 12px;">0</span>
-                </div>
-                <div class="panel-body" id="emailsList">
-                    <div class="loading">Chưa có email nào...</div>
-                </div>
-            </div>
+        <div class="panel">
+            <h3>📡 Request gần đây (<span id="reqCount">0</span>)</h3>
+            <div id="requestsList" style="max-height: 300px; overflow-y: auto;"></div>
         </div>
     </div>
 
-    <div id="toast" class="toast"></div>
-
     <script>
-        // State
-        let requests = [];
         let emails = [];
-        let autoRefreshInterval = null;
-        let proxyCheckInterval = null;
-
-        // API endpoints (backend Python sẽ chạy)
-        const API_BASE = 'http://localhost:5000/api';
+        let requests = [];
         
-        // Khởi tạo
-        document.addEventListener('DOMContentLoaded', () => {
-            startAutoRefresh();
-            checkProxyStatus();
-        });
-
-        // Bắt đầu auto refresh
-        function startAutoRefresh() {
-            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-            autoRefreshInterval = setInterval(() => {
-                if (document.getElementById('autoRefresh').checked) {
-                    fetchData();
-                }
-            }, 2000);
-        }
-
-        // Kiểm tra status ProxyPin
-        async function checkProxyStatus() {
-            try {
-                const response = await fetch(`${API_BASE}/status`);
-                const data = await response.json();
-                const statusDiv = document.getElementById('proxyStatus');
-                if (data.status === 'online') {
-                    statusDiv.className = 'status-card online';
-                    statusDiv.innerHTML = '<div class="label">ProxyPin Status</div><div class="value">✅ Online</div>';
-                } else {
-                    statusDiv.className = 'status-card offline';
-                    statusDiv.innerHTML = '<div class="label">ProxyPin Status</div><div class="value">❌ Offline</div>';
-                }
-            } catch (e) {
-                const statusDiv = document.getElementById('proxyStatus');
-                statusDiv.className = 'status-card offline';
-                statusDiv.innerHTML = '<div class="label">ProxyPin Status</div><div class="value">⚠️ Không kết nối</div>';
-            }
-        }
-
-        // Fetch dữ liệu từ backend
+        // Kết nối đến Python backend (chạy trên máy local)
+        const API_URL = 'http://localhost:5000/api';
+        
         async function fetchData() {
             try {
-                const response = await fetch(`${API_BASE}/data`);
+                const response = await fetch(`${API_URL}/data`);
                 const data = await response.json();
-                requests = data.requests || [];
                 emails = data.emails || [];
+                requests = data.requests || [];
                 updateUI();
+                document.getElementById('status').className = 'status online';
+                document.getElementById('status').innerHTML = '● Đã kết nối với Python backend';
             } catch (e) {
-                console.error('Lỗi fetch data:', e);
+                document.getElementById('status').className = 'status offline';
+                document.getElementById('status').innerHTML = '● Chưa kết nối (cần chạy python backend.py)';
             }
         }
-
-        // Cập nhật UI
+        
         function updateUI() {
-            // Update counts
-            document.getElementById('totalRequests').innerText = requests.length;
-            document.getElementById('totalEmails').innerText = emails.length;
-            document.getElementById('requestCount').innerText = requests.length;
             document.getElementById('emailCount').innerText = emails.length;
+            document.getElementById('reqCount').innerText = requests.length;
             
-            // Render requests
-            const filter = document.getElementById('filterInput').value.toLowerCase();
-            const filteredRequests = filter ? requests.filter(r => 
-                r.url.toLowerCase().includes(filter) || 
-                (r.body && r.body.toLowerCase().includes(filter))
-            ) : requests;
+            const filter = document.getElementById('filter').value.toLowerCase();
+            const filtered = filter ? emails.filter(e => e.email.toLowerCase().includes(filter)) : emails;
             
-            const requestsList = document.getElementById('requestsList');
-            if (filteredRequests.length === 0) {
-                requestsList.innerHTML = '<div class="loading">Không có request nào</div>';
+            const emailsDiv = document.getElementById('emailsList');
+            if (filtered.length === 0) {
+                emailsDiv.innerHTML = '<div style="color:#888;">Chưa có email nào...</div>';
             } else {
-                requestsList.innerHTML = filteredRequests.map(req => `
-                    <div class="request-item" onclick="viewRequestDetail(${req.id})">
-                        <span class="request-method method-${req.method}">${req.method}</span>
-                        <span class="request-url">${truncateUrl(req.url, 60)}</span>
-                        <div class="request-time">⏱ ${req.time || new Date().toLocaleTimeString()}</div>
-                    </div>
-                `).join('');
-            }
-            
-            // Render emails
-            const filteredEmails = filter ? emails.filter(e => 
-                e.email.toLowerCase().includes(filter)
-            ) : emails;
-            
-            const emailsList = document.getElementById('emailsList');
-            if (filteredEmails.length === 0) {
-                emailsList.innerHTML = '<div class="loading">Chưa có email nào</div>';
-            } else {
-                emailsList.innerHTML = filteredEmails.map(e => `
+                emailsDiv.innerHTML = filtered.map(e => `
                     <div class="email-item">
-                        <button class="copy-btn" onclick="copyToClipboard('${e.email}')">📋 Copy</button>
-                        <div class="email-address">📧 ${e.email}</div>
-                        <div class="email-source">🔗 Từ: ${truncateUrl(e.source, 50)}</div>
-                        <div class="email-source">⏱ ${e.time}</div>
+                        <div class="email">📧 ${e.email}</div>
+                        <div class="time">⏱ ${e.time} | 🔗 ${e.source?.substring(0, 50)}...</div>
+                        <button onclick="copy('${e.email}')" style="margin-top:5px; padding:5px 10px;">📋 Copy</button>
                     </div>
                 `).join('');
             }
+            
+            const reqDiv = document.getElementById('requestsList');
+            reqDiv.innerHTML = requests.slice(0, 20).map(r => `
+                <div class="request-item">
+                    <span class="method">${r.method}</span>
+                    <span class="url">${r.url?.substring(0, 80)}</span>
+                    <div style="font-size:10px; color:#888;">${r.time}</div>
+                </div>
+            `).join('');
         }
-
-        // Bắt đầu capture (gọi backend)
-        async function startCapture() {
-            showToast('Đang bắt đầu capture qua ProxyPin...');
-            try {
-                await fetch(`${API_BASE}/start`, { method: 'POST' });
-                showToast('✅ Đã bắt đầu capture!');
-            } catch (e) {
-                showToast('❌ Lỗi: ' + e.message);
-            }
-        }
-
-        // Xóa dữ liệu
+        
         async function clearData() {
-            if (confirm('Xóa tất cả dữ liệu?')) {
-                await fetch(`${API_BASE}/clear`, { method: 'POST' });
-                requests = [];
-                emails = [];
-                updateUI();
-                showToast('Đã xóa dữ liệu');
-            }
+            await fetch(`${API_URL}/clear`, { method: 'POST' });
+            fetchData();
         }
-
-        // Export dữ liệu
+        
         function exportData() {
-            const data = { requests, emails, exportTime: new Date().toISOString() };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const data = { emails, exportTime: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `ff_capture_${Date.now()}.json`;
+            a.download = `emails_${Date.now()}.json`;
             a.click();
-            URL.revokeObjectURL(url);
-            showToast('Đã export dữ liệu');
         }
-
-        // Filter data
-        function filterData() {
-            updateUI();
-        }
-
-        // Helper functions
-        function truncateUrl(url, maxLength) {
-            if (!url) return 'N/A';
-            return url.length > maxLength ? url.substring(0, maxLength) + '...' : url;
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text);
-            showToast(`Đã copy: ${text}`);
-        }
-
-        function viewRequestDetail(reqId) {
-            const req = requests.find(r => r.id === reqId);
-            if (req) {
-                alert(`URL: ${req.url}\nMethod: ${req.method}\nBody: ${req.body || 'None'}`);
-            }
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.style.display = 'block';
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 2000);
-        }
-
-        // Check proxy status periodically
-        setInterval(checkProxyStatus, 5000);
+        
+        function filterEmails() { updateUI(); }
+        function copy(text) { navigator.clipboard.writeText(text); alert('Đã copy: ' + text); }
+        
+        setInterval(fetchData, 2000);
+        fetchData();
     </script>
 </body>
 </html>
