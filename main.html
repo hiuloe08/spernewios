@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF Email Capture - ProxyPin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: monospace;
+            background: #1a1a2e;
+            padding: 20px;
+            color: #eee;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .online { background: #0f3460; color: #00ff00; }
+        .offline { background: #0f3460; color: #ff0000; }
+        .panel {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .email-item {
+            background: #0f3460;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 3px solid #00ff00;
+        }
+        .email { font-size: 18px; font-weight: bold; color: #00ff00; }
+        .time { font-size: 11px; color: #888; margin-top: 5px; }
+        button {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #ff6b6b; }
+        input {
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            background: #0f3460;
+            border: 1px solid #e94560;
+            color: white;
+            border-radius: 5px;
+        }
+        .request-item {
+            background: #0f3460;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-size: 12px;
+            overflow: hidden;
+        }
+        .method {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #e94560;
+            border-radius: 3px;
+            margin-right: 10px;
+            font-size: 10px;
+        }
+        .url { word-break: break-all; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 FF Email Capture Tool</h1>
+            <p>Kết nối với ProxyPin → Tự động lấy email xác thực</p>
+            <div id="status" class="status offline">● Đang kết nối...</div>
+        </div>
+
+        <div class="panel">
+            <h3>📡 Cấu hình ProxyPin</h3>
+            <code style="background:#0f3460; padding:10px; display:block; border-radius:5px;">
+                Webhook URL: http://[IP_MÁY_TÍNH]:5000/api/capture<br>
+                Method: POST<br>
+                Content-Type: application/json
+            </code>
+        </div>
+
+        <div class="panel">
+            <h3>📧 Email đã capture (<span id="emailCount">0</span>)</h3>
+            <button onclick="clearData()">🗑 Xóa hết</button>
+            <button onclick="exportData()">💾 Export JSON</button>
+            <input type="text" id="filter" placeholder="🔍 Lọc email..." onkeyup="filterEmails()">
+            <div id="emailsList"></div>
+        </div>
+
+        <div class="panel">
+            <h3>📡 Request gần đây (<span id="reqCount">0</span>)</h3>
+            <div id="requestsList" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <script>
+        let emails = [];
+        let requests = [];
+        
+        // Kết nối đến Python backend (chạy trên máy local)
+        const API_URL = 'http://localhost:5000/api';
+        
+        async function fetchData() {
+            try {
+                const response = await fetch(`${API_URL}/data`);
+                const data = await response.json();
+                emails = data.emails || [];
+                requests = data.requests || [];
+                updateUI();
+                document.getElementById('status').className = 'status online';
+                document.getElementById('status').innerHTML = '● Đã kết nối với Python backend';
+            } catch (e) {
+                document.getElementById('status').className = 'status offline';
+                document.getElementById('status').innerHTML = '● Chưa kết nối (cần chạy python backend.py)';
+            }
+        }
+        
+        function updateUI() {
+            document.getElementById('emailCount').innerText = emails.length;
+            document.getElementById('reqCount').innerText = requests.length;
+            
+            const filter = document.getElementById('filter').value.toLowerCase();
+            const filtered = filter ? emails.filter(e => e.email.toLowerCase().includes(filter)) : emails;
+            
+            const emailsDiv = document.getElementById('emailsList');
+            if (filtered.length === 0) {
+                emailsDiv.innerHTML = '<div style="color:#888;">Chưa có email nào...</div>';
+            } else {
+                emailsDiv.innerHTML = filtered.map(e => `
+                    <div class="email-item">
+                        <div class="email">📧 ${e.email}</div>
+                        <div class="time">⏱ ${e.time} | 🔗 ${e.source?.substring(0, 50)}...</div>
+                        <button onclick="copy('${e.email}')" style="margin-top:5px; padding:5px 10px;">📋 Copy</button>
+                    </div>
+                `).join('');
+            }
+            
+            const reqDiv = document.getElementById('requestsList');
+            reqDiv.innerHTML = requests.slice(0, 20).map(r => `
+                <div class="request-item">
+                    <span class="method">${r.method}</span>
+                    <span class="url">${r.url?.substring(0, 80)}</span>
+                    <div style="font-size:10px; color:#888;">${r.time}</div>
+                </div>
+            `).join('');
+        }
+        
+        async function clearData() {
+            await fetch(`${API_URL}/clear`, { method: 'POST' });
+            fetchData();
+        }
+        
+        function exportData() {
+            const data = { emails, exportTime: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `emails_${Date.now()}.json`;
+            a.click();
+        }
+        
+        function filterEmails() { updateUI(); }
+        function copy(text) { navigator.clipboard.writeText(text); alert('Đã copy: ' + text); }
+        
+        setInterval(fetchData, 2000);
+        fetchData();
+    </script>
+</body>
+</html>
