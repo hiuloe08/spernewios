@@ -5,9 +5,7 @@
     "cordova-ios": "7.0.1"
   },
   "cordova": {
-    "platforms": [
-      "ios"
-    ],
+    "platforms": ["ios"],
     "plugins": {}
   }
 }
