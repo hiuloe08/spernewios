@@ -1,0 +1,9 @@
+{
+  "platform": "cordova",
+  "type": "ios",
+  "buildConfig": {
+    "cordova": {
+      "prepare": true
+    }
+  }
+}
