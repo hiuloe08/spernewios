@@ -1,10 +1,4 @@
 {
   "platform": "cordova",
-  "type": "ios",
-  "buildConfig": {
-    "cordova": {
-      "prepare": true,
-      "platformVersion": "7.0.1"
-    }
-  }
+  "type": "ios"
 }
