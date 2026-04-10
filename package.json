@@ -1,7 +1,11 @@
 {
   "name": "spernew-optimize",
   "version": "1.0.0",
+  "dependencies": {
+    "cordova-ios": "^7.0.0"
+  },
   "cordova": {
-    "platforms": ["ios"]
+    "platforms": ["ios"],
+    "plugins": {}
   }
 }
